@@ -112,24 +112,17 @@ const Configs = [
             mPath: 'https://raw.githubusercontent.com/akondare/F18Model/ssdm/tensorflowjs_model.pb',
             wPath: 'https://raw.githubusercontent.com/akondare/F18Model/ssdm/weights_manifest.json',
         }
+    }, {
+        type: 'ssd',
+        title: 'Faster R-CNN',
+        config: {
+            classes: Coco,
+            mPath: 'https://raw.githubusercontent.com/akondare/F18Model/ssdm/tensorflowjs_model.pb',
+            wPath: 'https://raw.githubusercontent.com/akondare/F18Model/ssdm/weights_manifest.json',
+        }
     }
 ];
 
-/*
-const getModel: () => void = (c: any) => {
-    switch(c.type) {
-        case 'yolo': return new YoloModel(c.title, c.config);
-        case 'ssd': return new SsdModel(c.title, c.config);
-    }
-};
-
-const Models: IModel[] = [
-    new YoloModel('Yolo-Coco'),
-    new YoloModel('Yolo-F18'),
-    new SsdModel('Ssd-Coco'),
-    new SsdModel('Ssd-F18'),
-];
-*/
 const getModel: (c) => IModel = (c: any) => {
     switch(c.type) {
         case 'yolo2': return new Yolo2Model(c.title, c.config);

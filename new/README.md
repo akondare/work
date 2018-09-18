@@ -1,55 +1,26 @@
-# React Project Template
+# Object Detection Web App
 
-This is a project template for a React project that comes setup with the following:
+This is a React/Typescript Web Application that allows you to run object detection neural networks in the browser using [TensorFlow.js](https://js.tensorflow.org).
 
--   [Typescript](https://www.typescriptlang.org/)
--   [Bootstrap](https://getbootstrap.com/docs/3.3/getting-started/)
--   [Sass](http://sass-lang.com/)
--   [Redux](https://redux.js.org/)
-
-Also includes gulp scripts for setting up a development server and building a production WAR file.
-
-## Creating a new project from this template
-
-1.  Run `git clone git@cb-gitlab:common/react-ts-template.git my-new-project`
-
-    This will create a new folder called `my-new-project` in the directory you ran the command from.
-
-2.  Delete `.git` in the `my-new-project` folder
-3.  `cd` into new folder then run `git init` to create your new git repository.
-4.  Run `git remote add origin <url-to-new-gitlab-project>`
-5.  `git add -A` to stage everything
-6.  `git commit -m "Initial commit"`
-7.  `git push -u origin master` to push to GitLab
+## Models
+Currently supports:
+- yolov2 : [yad2k](https://github.com/allanzelener/YAD2K)
+- yolov3 : [keras-yolo3](https://github.com/qqwweee/keras-yolo3)
+- [TensorFlow Object Detection API](https://github.com/tensorflow/models/blob/master/research/object_detection/g3doc/detection_model_zoo.md) models :
+    - SSD
+    - Faster R-CNN
+    - R-FCN
 
 ## Setup
+1. Convert to tfjs model format using [tfjs-converter](https://github.com/tensorflow/tfjs-converter)
+2. Host model and weight shards online under same url path
+3. Create model in `src/Models/index.tsx` based on model type
 
-1.  Update the project name and description in `package.json`
-2.  Change any desired settings (such as production WAR file name) in `config/gulp.config.js`
-3.  If you don't have [Yarn](https://yarnpkg.com/en/), install it (run `yarn -v` to check the version).
-4.  Run `yarn run setup` to install the necessary packages. This will also start the dev server.
-5.  Navigate to `http://localhost:3000/` in your browser (assuming `devAddress` and `devPort` are unchanged in `config/gulp.config.js`)
+## Tensorflow.js Primer
+Consult [API](https://js.tensorflow.org/api/0.13.0/) for more specifics: 
 
-## Development
+All Tensorflow Saved/Frozen Models are converted to `tf.FrozenModel` which can be executed using `tf.execute` or `tf.executeAsync` depending on existence of dynamic/control-flow ops
 
-Run `yarn start` to start the dev server
+All Keras Models are converted to `tf.Model` which can be executed using `tf.predict` 
 
-### Static files
-
-Static files (such as images) should be placed in `assets/`
-
-### External sources
-
-Third party or standalone script files can either be placed in `assets/` or in `lib/`.
-
-## Production
-
-`yarn run build` will create a minified production .war file in the `dist` folder.
-
-`yarn run build-unminified` will create an unminified production .war file (source maps included).
-
-## Testing
-
-Run `yarn run test` to run all tests in the project.
-
-Jest configuration files are located in `config/`
+The creation of Tensors requires disposal after use using `tf.dispose`. Surrounding code in `tf.tidy` 
