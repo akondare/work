@@ -1,0 +1,14 @@
+{
+    "automock": false,
+    "testMatch": ["**/source_maps/**/*test.js?(x)"],
+    "moduleFileExtensions": ["js"],
+    "moduleNameMapper": {
+        "\\.css$": "<rootDir>/config/jest.mock.js",
+        "src/(.*)": "<rootDir>/source_maps/$1"
+    },
+    "modulePaths": ["<rootDir>/"],
+    "coverageDirectory": "./coverage_report",
+    "coveragePathIgnorePatterns": ["/lib/"],
+    "globals": {},
+    "setupFiles": ["./config/jest.setup.js"]
+}

@@ -1,0 +1,104 @@
+.App {
+  height:100%;
+  width:100%;
+  text-align: center;
+  background-color: #222;
+}
+
+
+
+
+.Header {
+  height: 150px;
+  padding: 20px;
+  color: white;
+  overflow:visible
+}
+.Detection {
+  text-align: center;
+  width: 100%;
+  height: 100%;
+}
+
+
+
+
+
+
+
+.Title {
+  font-size: 1.5em;
+}
+.Control {
+  height:48px;
+  display:flex;
+  flex-direction: row;
+  justify-content: center;
+}
+.Canvases {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  margin:auto;
+}
+.ImageCanvas {
+  position: absolute;
+  /* background-color:yellow; */
+}
+.ZoneCanvas {
+  position: absolute;
+  z-index: 10;
+}
+
+
+.DropDown {
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  width:120px;
+}
+.DropDownList {
+  position:relative;
+  margin:auto;
+  z-index:50;
+}
+ul {
+  list-style-type: none;
+  vertical-align:center;
+  padding:0;
+  text-align:center;
+  width:100%;
+}
+
+
+
+.Button {
+  border: none;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  padding: 15px 32px;
+}
+.ListElem {
+  border: none;
+  color: white;
+  /* padding: 15px 0px; */
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  font-size: 16px;
+}
+.Enabled {
+  background-color: #4CAF50; /* Green */
+}
+.Disabled {
+  background-color: #f44336; /* Green */
+}
+.Toggled {
+  background-color: #309040; /* Green */
+}

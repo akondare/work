@@ -1,0 +1,16 @@
+{
+    "rootDir": "../src",
+    "automock": false,
+    "transform": {
+        ".(ts|tsx)": "ts-jest"
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": ["ts", "tsx", "js"],
+    "moduleNameMapper": {
+        "\\.css$": "<rootDir>/config/jest.mock.js"
+    },
+    "modulePaths": ["<rootDir>/"],
+    "coverageDirectory": "./coverage_report",
+    "coveragePathIgnorePatterns": ["/lib/"],
+    "globals": {}
+}
