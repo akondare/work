@@ -50,8 +50,8 @@ export default class Rect implements IRect {
     }
     public scale(scale: number) {
         return new Rect(
-            this.top * scale,
             this.left * scale,
+            this.top * scale,
             this.width * scale,
             this.height * scale,
         );

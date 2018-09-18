@@ -116,6 +116,8 @@ class App extends React.Component<AllProps, State> {
                         disabled={!this.state.canPickModel}
                         isButton={true}
                         title="Select Classes"
+                        scroll={true}
+                        scrollHeight={500}
                     >
                         {this.getClasses()}
                     </DropDownMenu>
@@ -187,7 +189,9 @@ class App extends React.Component<AllProps, State> {
     }
     private async detect() {
         this.setState({canDetect: false});
+        console.log(this.imageElement, this.zone);
         this.predictions = await this.model.detect(this.imageElement, this.zone);
+        console.log(this.predictions);
         this.detWin.setPreds(this.predictions);
         this.setState({canDetect: true, detected: true});
     }

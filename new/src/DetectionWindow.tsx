@@ -60,6 +60,7 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
         this.loadImage = this.loadImage.bind(this);
         this.setTrans = this.setTrans.bind(this);
         this.zoom = this.zoom.bind(this);
+        this.image.crossOrigin = 'anonymous';
     }
 
     public componentWillMount() {
@@ -163,8 +164,8 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
     private mouseLeave(event: any) {
         if (!this.props.selecting) { return; }
 
-        const endX: number = Math.min(this.canvasRect[2], (event.clientX - this.canvasRect[0]));
-        const endY: number = Math.min(this.canvasRect[3], (event.clientY - this.canvasRect[1]));
+        const endX: number = Math.max(0, Math.min(this.canvasRect[2], (event.clientX - this.canvasRect[0])));
+        const endY: number = Math.max(0, Math.min(this.canvasRect[3], (event.clientY - this.canvasRect[1])));
         this.drawZone(endX, endY);
         this.finalizeZone();
         event.target.removeEventListener('mousemove', this.mouseMove);
@@ -199,7 +200,7 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
             (w * scale),
             (h * scale)
         );
-
+        this.selected = true;
         this.props.selectedRegionHandler( this.selectedZone.scale(this.origScale) );
     }
 
@@ -330,6 +331,7 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
         ctx.restore();
     }
     private drawPredsToZone() {
+        console.log(this.selected, this.props.detected);
         if (this.selected === false) { return; }
         this.clearCanvas(this.zoneCanvas);
         const [transX, transY, scale] = this.transform;
@@ -342,7 +344,7 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
         // DetectionWindow.drawRect(this.zoneCanvas, this.selectedZone, '#000', thickness);
         DetectionWindow.shadeEverythingButRect(this.zoneCanvas, this.selectedZone);
         const preds = this.predictions;
-        if (this.props.detected) {
+        if (this.predictions !== null) {
             this.props.enabled.forEach((e, i) => {
                 if (e) {
                     preds[i].forEach((prediction: IDetection) => {

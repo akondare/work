@@ -1,0 +1,6 @@
+new/.*
+old/.*
+new/node_modules
+old/node_modules
+new/dist
+old/dist

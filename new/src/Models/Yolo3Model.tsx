@@ -14,7 +14,7 @@ interface YoloConfig {
     params?: YoloParams;
 }
 
-export default class YoloModel implements IModel {
+export default class Yolo3Model implements IModel {
     private static defaultParams: YoloParams = {iouThres: 0.5, probThres: 0.6, anchors: [
         [
             [81, 82],
@@ -26,7 +26,7 @@ export default class YoloModel implements IModel {
             [37, 58],
         ],
     ]};
-    private static defaultConfig: YoloConfig = {classes: [], path: '', params: YoloModel.defaultParams};
+    private static defaultConfig: YoloConfig = {classes: [], path: '', params: Yolo3Model.defaultParams};
 
     public title: string;
     public classes: string[];
@@ -38,10 +38,10 @@ export default class YoloModel implements IModel {
 
     public constructor(title: string, config?: YoloConfig) {
         this.title = title;
-        config = config || YoloModel.defaultConfig;
+        config = config || Yolo3Model.defaultConfig;
         this.classes = config.classes || [];
         this.path = config.path || '';
-        this.params = config.params || YoloModel.defaultParams;
+        this.params = config.params || Yolo3Model.defaultParams;
     }
 
     public async load() {
@@ -84,7 +84,7 @@ export default class YoloModel implements IModel {
         console.log(iouThres, probThres, anchors[0]);
 
         // getting inference output
-        const modelOutput: tf.Tensor[] = tf.tidy( () => {
+        const modelOutput: tf.Tensor | tf.Tensor[] = tf.tidy( () => {
             const canvas: HTMLCanvasElement = document.createElement('canvas');
             const context: CanvasRenderingContext2D = canvas.getContext('2d');
             const side = 416;
@@ -109,12 +109,26 @@ export default class YoloModel implements IModel {
 
         tf.dispose(modelOutput); // dispose input tensor
 
-        // apply non max suppression and format as preds in image file scale
+        // apply non max suppression
         const final: Detection[] = await ModelOutputUtil.NMS(a, b, c, iouThres, probThres);
-        console.log(final);
         tf.dispose([a, b, c]);
         tf.disposeVariables();
 
-        return final;
+        // convert to in image scale
+        const [zoneLeft, zoneTop, width, height] = rect.getArray();
+        const scaleW = width / 416;
+        const scaleH = height / 416;
+        return final.map(pred => {
+            const [left, top, right, bottom] = pred.box.getArray();
+            const leftOffset = Math.max(0, left) * scaleW;
+            const topOffset = Math.max(0, top) * scaleH;
+            const w = Math.min(width, right * scaleW) - leftOffset;
+            const h = Math.min(height, bottom * scaleH) - topOffset;
+            return {
+                box: new Rect(leftOffset + zoneLeft, topOffset + zoneTop, w, h),
+                score: pred.score,
+                class: pred.class
+            };
+        });
     }
 }

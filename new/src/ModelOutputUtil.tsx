@@ -179,7 +179,8 @@ export default class ModelOutputUtil {
 
         const detected:IDetection[] = selectedBoxes.map(box => {
                 return {
-                    box: new Rect(box[1][0],box[1][1],box[1][2],box[1][3]),
+                    // box: new Rect(box[1][0],box[1][1],box[1][2],box[1][3]),
+                    box: new Rect(box[1][1],box[1][0],box[1][3],box[1][2]),
                     class: box[2],
                     score: box[0]
                 };
