@@ -425,6 +425,7 @@ export default class Detection extends React.Component<{}, IState>{
     protected getFinalPreds(preds:IDetection[],probThres:number,zone:Rect,width:number,height:number) {
         const ratioX = zone.width / width;
         const ratioY = zone.height / height;
+        console.log(ratioX, ratioY)
         const results:IDetection[][] = Array<IDetection[]>(this.classes.length); 
         for(let i=0; i<results.length;i++) { results[i] = [] }
         preds.forEach(p => {

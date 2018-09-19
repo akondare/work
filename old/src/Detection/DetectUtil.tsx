@@ -77,7 +77,7 @@ const DetectUtil:IDetectUtil = {
             tf.dispose(modelOutput)
             tf.dispose(post);
 
-            console.log(boxes,scores,classes,num);
+            console.log(boxes);
 
             const detections:IDetection[] = [];
             scores.forEach((score,i) => {

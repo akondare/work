@@ -1,4 +1,3 @@
-import { Model, FrozenModel } from '@tensorflow/tfjs';
 import { Rect, Detection } from '../types';
 
 export default interface IModel {

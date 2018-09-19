@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 import IModel from './IModel';
 import { Rect, Detection } from '../types';
-import ModelOutputUtil from '../ModelOutputUtil';
+import ModelOutputUtil from './ModelOutputUtil';
 
 interface YoloParams {
     iouThres: number;
@@ -75,6 +75,7 @@ export default class Yolo2Model implements IModel {
     public async detect(image: HTMLImageElement, rect: Rect): Promise<Detection[]> {
         // get params
         const {iouThres, probThres, anchors} = this.params;
+        console.log(this.params);
 
         // getting inference output
         const modelOutput: tf.Tensor = tf.tidy( () => {

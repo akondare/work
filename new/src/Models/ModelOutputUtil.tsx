@@ -1,9 +1,8 @@
 /* tslint:disable */
 import * as tf from '@tensorflow/tfjs';
 import { Tensor } from '@tensorflow/tfjs';
-import IDetection from './types/IDetection';
-import Rect from './types/Rect';
-// import { nonMaxSuppression } from '../../../node_modules/@tensorflow/tfjs-core/dist/ops/image_ops';
+import IDetection from '../types/IDetection';
+import Rect from '../types/Rect';
 
 export default class ModelOutputUtil {
 
@@ -188,6 +187,140 @@ export default class ModelOutputUtil {
         console.log("after nms", detected);
         return detected
     }
+    public static async NMS3(boxesTensor:Tensor, scoresTensor:Tensor, classesTensor:Tensor,iouThreshold:number,scoresThres:number) {
+        console.log(boxesTensor.shape,scoresTensor,classesTensor,iouThreshold);
+        const [boxes,scores,classes]:Array<Float32Array|Int32Array|Uint8Array> = await Promise.all([
+            boxesTensor.data(),
+            scoresTensor.data(),
+            classesTensor.data(),
+        ]);
+
+        console.log(boxes,scores,classes)
+        const zipped = [];
+        for (let i=0; i<scores.length; i++) {
+          zipped.push([
+            scores[i], [boxes[4*i], boxes[4*i+1], boxes[4*i+2], boxes[4*i+3]], classes[i],
+          ]);
+        }
+        // Sort by descending order of scores (first index of zipped array)
+        const sortedBoxes = zipped.sort((a, b) => b[0] - a[0]);
+      
+        // const selectedBoxes = [];
+        const selectedBoxes = [];
+      
+        // Greedily go through boxes in descending score order and only
+        // return boxes that are below the IoU threshold.
+        for( let box of sortedBoxes) {
+            if(box[0] < scoresThres ) { break };
+            let add = true;
+            for(let i = 0; i < selectedBoxes.length; i++) {
+                const sel = selectedBoxes[i];
+                const inter = ModelOutputUtil.boxIntersection(box[1],sel[1])
+                const union = ModelOutputUtil.boxUnion(box[1],sel[1])
+                const area = Math.max( 
+                    (sel[1][3]-sel[1][1]) * (sel[1][2] - sel[1][0]),
+                    (box[1][3]-box[1][1]) * (box[1][2] - box[1][0])
+                );
+                if( area == union ) {
+                    selectedBoxes[i] = box;
+                    add = false;
+                    break;
+                }
+                if (((inter/union) > iouThreshold)) {
+                    add = false;
+                    break;
+                }
+            }
+
+            if (add) {
+                selectedBoxes.push(box)
+            }
+        };
+
+        const detected:IDetection[] = selectedBoxes.map(box => {
+                return {
+                    // box: new Rect(box[1][0],box[1][1],box[1][2],box[1][3]),
+                    box: new Rect(box[1][1],box[1][0],box[1][3],box[1][2]),
+                    class: box[2],
+                    score: box[0]
+                };
+        });
+        console.log("after nms", detected);
+        return detected
+    }
+
+    /*
+    public static async NMS3(b1:Tensor, s1:Tensor, c1:Tensor,
+                             b2:Tensor, s2:Tensor, c2:Tensor,
+                             iouThreshold:number,scoresThres:number) {
+
+
+        // add larger boxes in descending order of scores
+        let [boxes,scores,classes] = await Promise.all([
+            b1.data(),
+            s1.data(),
+            c1.data(),
+        ]);
+        let zipped = [];
+        for (let i=0; i<scores.length; i++) {
+          zipped.push([
+            scores[i], [boxes[4*i], boxes[4*i+1], boxes[4*i+2], boxes[4*i+3]], classes[i],
+          ]);
+        }
+
+        // Sort by descending order of scores (first index of zipped array)
+        let sortedBoxes = zipped.sort((a, b) => b[0] - a[0]);
+
+        [boxes,scores,classes] = await Promise.all([
+            b2.data(),
+            s2.data(),
+            c2.data(),
+        ]);
+        zipped = [];
+        for (let i=0; i<scores.length; i++) {
+          zipped.push([
+            scores[i], [boxes[4*i], boxes[4*i+1], boxes[4*i+2], boxes[4*i+3]], classes[i],
+          ]);
+        }
+        sortedBoxes = sortedBoxes.concat(zipped.sort((a, b) => b[0] - a[0]));
+
+      
+        // const selectedBoxes = [];
+        const selectedBoxes = [];
+      
+        // Greedily go through boxes in descending score order and only
+        // return boxes that are below the IoU threshold.
+        for( const box of sortedBoxes) {
+            if(box[0] < scoresThres ) { break };
+            let add = true;
+            for( const sel of selectedBoxes) {
+                const inter = ModelOutputUtil.boxIntersection(box[1],sel[1]);
+                const union = ModelOutputUtil.boxUnion(box[1],sel[1]);
+                const area = (sel[1][3]-sel[1][1]) * (sel[1][2] - sel[1][0]);
+                // if (((inter/union) > iouThreshold) && union > area) {
+                if (((inter/union) > iouThreshold) || union === area ) {
+                    add = false;
+                    break;
+                }
+            }
+
+            if (add) {
+                selectedBoxes.push(box)
+            }
+        };
+
+        const detected:IDetection[] = selectedBoxes.map(box => {
+                return {
+                    // box: new Rect(box[1][0],box[1][1],box[1][2],box[1][3]),
+                    box: new Rect(box[1][1],box[1][0],box[1][3],box[1][2]),
+                    class: box[2],
+                    score: box[0]
+                };
+        });
+        console.log("after nms", detected);
+        return detected
+    }
+    */
 
     public static boxIntersection(a, b) {
         const w = Math.min(a[3], b[3]) - Math.max(a[1], b[1]);

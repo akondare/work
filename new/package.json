@@ -15,7 +15,7 @@
         "@cgsweb/core": "^1.0.3",
         "@cgsweb/theme": "^1.0.0",
         "@cgsweb/util": "^1.0.0",
-        "@tensorflow/tfjs": "^0.12.6",
+        "@tensorflow/tfjs": "^0.13.0",
         "aphrodite": "^1.2.5",
         "autobind-decorator": "^2.1.0",
         "babel-polyfill": "^6.26.0",

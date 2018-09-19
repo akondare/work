@@ -1,7 +1,7 @@
 import * as tf from '@tensorflow/tfjs';
 import IModel from './IModel';
 import { Rect, Detection } from '../types';
-import ModelOutputUtil from '../ModelOutputUtil';
+import ModelOutputUtil from './ModelOutputUtil';
 
 interface YoloParams {
     iouThres: number;
@@ -98,20 +98,47 @@ export default class Yolo3Model implements IModel {
         });
 
         // run and get filtered boxes
-        const [a , b, c]: any = tf.tidy( () => {
-            const firstAnchors = anchors[0];
+        const [a1, b1, c1]: any = tf.tidy( () => {
             const [allB, allC, allP] = this.postProcess(
                 modelOutput[0],
-                tf.tensor2d(firstAnchors, [3, 2], 'float32'),
+                tf.tensor2d(anchors[0], [3, 2], 'float32'),
                 this.classes.length, 416, 416);
             return this.filterBoxes(allB, allC, allP, 0.01, 416, 416) as [tf.Tensor, tf.Tensor, tf.Tensor];
         });
 
+        const [a2, b2, c2]: any = tf.tidy( () => {
+            const [allB, allC, allP] = this.postProcess(
+                modelOutput[1],
+                tf.tensor2d(anchors[1], [3, 2], 'float32'),
+                this.classes.length, 416, 416);
+            return this.filterBoxes(allB, allC, allP, 0.01, 416, 416) as [tf.Tensor, tf.Tensor, tf.Tensor];
+        });
+
+        /*
+        const a = tf.concat([a1, a2]);
+        const b = tf.concat([b1, b2]);
+        const c = tf.concat([c1, c2]);
+        const final: Detection[] = await ModelOutputUtil.NMS(a, b, c, iouThres, probThres);
+        tf.dispose([a, b, c]);
+        */
+
         tf.dispose(modelOutput); // dispose input tensor
 
         // apply non max suppression
-        const final: Detection[] = await ModelOutputUtil.NMS(a, b, c, iouThres, probThres);
+
+        // const final: Detection[] = await ModelOutputUtil.NMS3(a1, b1, c1, a2, b2, c2, iouThres, probThres);
+        // const final: Detection[] = await ModelOutputUtil.NMS(a2, b2, c2, iouThres, probThres);
+
+        // /*
+        const a = tf.concat([a1, a2]);
+        const b = tf.concat([b1, b2]);
+        const c = tf.concat([c1, c2]);
+        const final: Detection[] = await ModelOutputUtil.NMS3(a, b, c, iouThres, probThres);
         tf.dispose([a, b, c]);
+        // */
+
+        tf.dispose([a1, a2, b1, b2, c1, c2]);
+        // tf.dispose([a, b, c]);
         tf.disposeVariables();
 
         // convert to in image scale

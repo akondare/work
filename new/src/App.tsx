@@ -247,7 +247,8 @@ class App extends React.Component<AllProps, State> {
             canPickModel: true,
             detected: false
         });
-        this.detWin.resetSelection();
+        this.predictions = null;
+        this.detWin.resetPreds();
     }
 }
 

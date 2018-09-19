@@ -105,6 +105,10 @@ export default class DetectionWindow extends React.Component<IProps, IState> {
         this.selected = false;
         this.selectedZone = null;
     }
+    public resetPreds() {
+        this.predictions = null;
+        this.drawPredsToZone();
+    }
 
     public setPreds(regPreds: IDetection[]) {
         // init array of arrays

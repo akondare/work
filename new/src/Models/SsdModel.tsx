@@ -3,7 +3,9 @@ import IModel from './IModel';
 import { Rect, Detection } from '../types';
 
 interface SsdParams {
+    scoreThres: number;
 }
+
 interface SsdConfig {
     classes: string[];
     mPath: string;
@@ -12,8 +14,15 @@ interface SsdConfig {
 }
 
 export default class SsdModel implements IModel {
-    private static defaultParams: SsdParams = {};
-    private static defaultConfig: SsdConfig = {classes: [], mPath: '', wPath: '', params: SsdModel.defaultParams};
+    private static defaultParams: SsdParams = {
+        scoreThres: 0.6
+    };
+    private static defaultConfig: SsdConfig = {
+        classes: [],
+        mPath: '',
+        wPath: '',
+        params: SsdModel.defaultParams
+    };
 
     public title: string;
     public classes: string[];
@@ -41,18 +50,18 @@ export default class SsdModel implements IModel {
     }
 
     public async detect(image: HTMLImageElement, rect: Rect): Promise<Detection[]> {
-        // getting inference output
-        let width: number;
-        let height: number;
+        const [x, y, width, height] = [
+            Math.floor(rect.left),
+            Math.floor(rect.top),
+            Math.ceil(rect.width),
+            Math.ceil(rect.height),
+        ];
         const input: tf.Tensor4D = tf.tidy( () => {
             const canvas: HTMLCanvasElement = document.createElement('canvas');
             const context: CanvasRenderingContext2D = canvas.getContext('2d');
-            const [x, y, w, h] = rect.getArray();
-            width = w;
-            height = h;
             canvas.width = width;
             canvas.height = height;
-            context.drawImage(image, x, y, w, h, 0, 0, width, height);
+            context.drawImage(image, x, y, width, height, 0, 0, width, height);
             return tf.fromPixels(context.getImageData(0, 0, width, height)).expandDims(0);
         });
 
@@ -62,7 +71,7 @@ export default class SsdModel implements IModel {
         const num: number = (await modelOutput[3].data())[0];
         const post: tf.Tensor[] = tf.tidy(() => {
             const toRet: tf.Tensor[] = [
-                modelOutput[0].squeeze().slice(0, num).mul(tf.tensor1d([width, height, width, height])),
+                modelOutput[0].squeeze().slice(0, num).mul(tf.tensor1d([height, width, height, width])),
                 modelOutput[1].squeeze().slice(0, num),
                 modelOutput[2].squeeze().slice(0, num).sub(tf.scalar(2))
             ];
@@ -81,7 +90,7 @@ export default class SsdModel implements IModel {
         const detections: Detection[] = [];
         const [zoneLeft, zoneTop, , ] = rect.getArray();
         scores.forEach((score, i) => {
-            if( score < 0.5 ) { return; }
+            if( score < this.params.scoreThres ) { return; }
             const ind = i * 4;
             const top = boxes[ind];
             const left = boxes[ind + 1];
@@ -94,8 +103,6 @@ export default class SsdModel implements IModel {
                 score,
             });
         });
-        console.log('ssd');
-        console.log(detections);
         return detections;
     }
 }
